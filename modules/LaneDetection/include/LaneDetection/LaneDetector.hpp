@@ -3,10 +3,10 @@
 
 #include "opencv2/opencv.hpp"
 
-class LaneDetection
+class LaneDetector
 {
 public:
-    LaneDetection() = default;
+    LaneDetector() = default;
 
 private:
     cv::Mat cv_mat_;

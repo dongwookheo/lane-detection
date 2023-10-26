@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(LANE-DETECTION_SOURCE_FILES
-        src/LaneDetection.cpp
+        src/LaneDetector.cpp
         src/PreProcessor.cpp
 )
 
