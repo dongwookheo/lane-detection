@@ -5,7 +5,7 @@
 #include "opencv2/opencv.hpp"
 
 // 사용자 정의 헤더
-#include "LaneDetection/LaneDetection.hpp"
+#include "LaneDetection/LaneDetector.hpp"
 #include "LaneDetection/PreProcessor.hpp"
 
 int main()
