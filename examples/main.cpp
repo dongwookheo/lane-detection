@@ -10,7 +10,8 @@
 
 int main()
 {
-    cv::VideoCapture cap("../examples/Sub_project.avi");
+    cv::String file_path = "../examples/Sub_project.avi";
+    cv::VideoCapture cap(file_path);
     if(!cap.isOpened())
     {
         std::cerr << "Camera open failed!" << std::endl;
@@ -18,6 +19,8 @@ int main()
     }
 
     cv::Mat frame;
+    cv::Mat crop(cv::Size(640, 480), CV_8UC3);
+    cv::Mat mask_lidar = cv::imread("../examples/mask.png", CV_8UC1);
     while(true)
     {
         cap >> frame;
@@ -27,8 +30,13 @@ int main()
             break;
         }
 
+        frame.copyTo(crop, mask_lidar);
+        crop = crop(cv::Rect(0, frame.rows>>1, frame.cols, frame.rows>>1));
+        cv::cvtColor(crop, crop, cv::COLOR_BGR2HLS);
+
         cv::imshow("frame", frame);
-        if(cv::waitKey(10) == 'q')
+        cv::imshow("crop", crop);
+        if(cv::waitKey(10) == 27)   // ESC
             break;
     }
     cap.release();
