@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(modules)
 
-add_executable(main examples/main.cpp)
+# add_executable(main examples/main.cpp)
+# add_executable(main examples/simple_threshold.cpp)
+add_executable(main examples/test_hough.cpp)
 target_link_libraries(main PRIVATE
         LaneDetection
 )
