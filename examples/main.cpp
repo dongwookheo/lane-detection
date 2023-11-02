@@ -15,13 +15,6 @@ namespace {
     constexpr uint32_t roi_frame_height = (frame_height>>3)*5;
     constexpr uint32_t lane_width = 490;
     constexpr uint32_t offset = 400;
-
-    double left_estimation_slope = 0.0;
-    double left_estimation_intercept = 0.0;
-    double right_estimation_slope = 0.0;
-    double right_estimation_intercept = 0.0;
-    // alpha: 0.1 ~ 0.9: 0.1 에 가까울수록 현재 값을 더 잘 반영
-    float alpha = 0.1;
 }
 
 void divideLeftRightLine(std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines)
