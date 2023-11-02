@@ -72,8 +72,10 @@ int main()
         divideLeftRightLine(lines, left_lines, right_lines);
 
         // calculate slop and intercept using weighted average
-        double left_average_slope = 0.0, left_average_intercept = 0.0;
-        double right_average_slope = 0.0, right_average_intercept = 0.0;
+        double left_average_slope = 0.0;
+        double left_average_intercept = 0.0;
+        double right_average_slope = 0.0;
+        double right_average_intercept = 0.0;
         calculateSlopeAndIntercept(left_lines, left_average_slope, left_average_intercept);
         calculateSlopeAndIntercept(right_lines, right_average_slope, right_average_intercept);
 
@@ -81,10 +83,10 @@ int main()
         drawLines(frame, right_average_slope, right_average_intercept, cv::Scalar(0, 0, 255));
 
         // calculate lpos, rpos
-        calculatePos(left_average_slope, left_average_intercept, lpos, true, false);
-        calculatePos(right_average_slope, right_average_intercept, rpos, false, true);
+        calculatePos(lpos, left_average_slope, left_average_intercept, true);
+        calculatePos(rpos, right_average_slope, right_average_intercept, false);
 
-        estimatePos(left_average_slope, left_average_intercept, right_average_slope, right_average_intercept, lpos, rpos);
+        refinePos(left_average_slope, left_average_intercept, right_average_slope, right_average_intercept, lpos, rpos);
 
         drawLines(frame, left_average_slope, left_average_intercept, cv::Scalar(255, 0, 0));
         drawLines(frame, right_average_slope, right_average_intercept, cv::Scalar(255, 0, 0));
