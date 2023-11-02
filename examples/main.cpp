@@ -95,21 +95,6 @@ void calculatePos(const double& slope, const double& intercept, int32_t& pos, bo
 
 void estimatePos(double& left_slope, double& left_intercept, double& right_slope, double& right_intercept, int32_t& lpos, int32_t& rpos)
 {
-    // if((lpos < 0) && (rpos <= frame_width)){
-    //     if((0.6 < abs(right_slope)) && (abs(right_slope) < 1)){
-    //         lpos = rpos - lane_width;
-    //         left_slope = -right_slope;
-    //         left_intercept = offset - left_slope * lpos;
-    //     }
-    // }
-    // else if((rpos > frame_width) && (lpos >= 0)){
-    //     if((0.6 < abs(left_slope)) && (abs(left_slope) < 1)){
-    //         rpos = lpos + lane_width;
-    //         right_slope = -left_slope;
-    //         right_intercept = offset - right_slope * rpos;
-    //     }
-    // }
-
     if(lpos < 0){
         if((rpos <= frame_width) && (0.6 < abs(right_slope)) && (abs(right_slope) < 1)){
             lpos = rpos - lane_width;
@@ -200,6 +185,7 @@ int main()
         drawLines(frame, left_average_slope, left_average_intercept, cv::Scalar(0, 0, 255));
         drawLines(frame, right_average_slope, right_average_intercept, cv::Scalar(0, 0, 255));
 
+        // calculate lpos, rpos
         calculatePos(left_average_slope, left_average_intercept, lpos, true, false);
         calculatePos(right_average_slope, right_average_intercept, rpos, false, true);
 
@@ -211,6 +197,7 @@ int main()
         cv::rectangle(frame, cv::Rect(cv::Point(lpos-5, 395),cv::Point(lpos+5, 405)), cv::Scalar(0, 255, 0));
         cv::rectangle(frame, cv::Rect(cv::Point(rpos-5, 395),cv::Point(rpos+5, 405)), cv::Scalar(0, 255, 0));
 
+        // save csv file
         if (count_frame % 30 == 0)
             csvfile << lpos << "," << rpos << "\n";
 
