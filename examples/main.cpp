@@ -1,17 +1,8 @@
 // 시스템 헤더
-#include <cstdint>
 #include <iostream>
-#include <fstream>
-#include <tuple>
-#include <utility>
 
 // 서드 파티 헤더
 #include "opencv2/core.hpp"
-#include "opencv2/core/cvstd.hpp"
-#include "opencv2/core/fast_math.hpp"
-#include "opencv2/core/mat.hpp"
-#include "opencv2/core/operations.hpp"
-#include "opencv2/core/types.hpp"
 #include "opencv2/opencv.hpp"
 
 // 사용자 정의 헤더
