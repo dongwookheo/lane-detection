@@ -128,7 +128,7 @@ int main()
     }
 
     std::ofstream csvfile("../result/result.csv");
-    csvfile << "lpos, rpos \n";
+    csvfile << "count, frame, lpos, rpos \n";
 
     cv::uint32_t count_frame = 0;
     cv::Mat frame;
@@ -199,7 +199,7 @@ int main()
 
         // save csv file
         if (count_frame % 30 == 0)
-            csvfile << lpos << "," << rpos << "\n";
+            csvfile << (count_frame / 30 - 1) << ","<< count_frame << "," <<lpos << "," << rpos << "\n";
 
         // 기준 line
         cv::line(frame, cv::Point(0,offset), cv::Point(frame_width,offset), cv::Scalar(0,255,0), 1, cv::LINE_4);
