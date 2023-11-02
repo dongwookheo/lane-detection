@@ -1,5 +1,6 @@
 // 시스템 헤더
 #include <iostream>
+#include <fstream>
 
 // 서드 파티 헤더
 #include "opencv2/core.hpp"
@@ -94,18 +95,39 @@ void calculatePos(const double& slope, const double& intercept, int32_t& pos, bo
 
 void estimatePos(double& left_slope, double& left_intercept, double& right_slope, double& right_intercept, int32_t& lpos, int32_t& rpos)
 {
-    if((lpos < 0) && (rpos <= frame_width)){
-        if((0.6 < abs(right_slope)) && (abs(right_slope) < 1)){
+    // if((lpos < 0) && (rpos <= frame_width)){
+    //     if((0.6 < abs(right_slope)) && (abs(right_slope) < 1)){
+    //         lpos = rpos - lane_width;
+    //         left_slope = -right_slope;
+    //         left_intercept = offset - left_slope * lpos;
+    //     }
+    // }
+    // else if((rpos > frame_width) && (lpos >= 0)){
+    //     if((0.6 < abs(left_slope)) && (abs(left_slope) < 1)){
+    //         rpos = lpos + lane_width;
+    //         right_slope = -left_slope;
+    //         right_intercept = offset - right_slope * rpos;
+    //     }
+    // }
+
+    if(lpos < 0){
+        if((rpos <= frame_width) && (0.6 < abs(right_slope)) && (abs(right_slope) < 1)){
             lpos = rpos - lane_width;
             left_slope = -right_slope;
             left_intercept = offset - left_slope * lpos;
         }
+        else {
+            lpos = 0;
+        }
     }
-    else if((rpos > frame_width) && (lpos >= 0)){
-        if((0.6 < abs(left_slope)) && (abs(left_slope) < 1)){
+    else if(rpos > frame_width){
+        if((lpos >= 0) && (0.6 < abs(left_slope)) && (abs(left_slope) < 1)){
             rpos = lpos + lane_width;
             right_slope = -left_slope;
             right_intercept = offset - right_slope * rpos;
+        }
+        else {
+            rpos = frame_width;
         }
     }
 }
@@ -119,6 +141,9 @@ int main()
         std::cerr << "Camera open failed!" << std::endl;
         return -1;
     }
+
+    std::ofstream csvfile("../result/result.csv");
+    csvfile << "lpos, rpos \n";
 
     cv::uint32_t count_frame = 0;
     cv::Mat frame;
@@ -186,18 +211,20 @@ int main()
         cv::rectangle(frame, cv::Rect(cv::Point(lpos-5, 395),cv::Point(lpos+5, 405)), cv::Scalar(0, 255, 0));
         cv::rectangle(frame, cv::Rect(cv::Point(rpos-5, 395),cv::Point(rpos+5, 405)), cv::Scalar(0, 255, 0));
 
+        if (count_frame % 30 == 0)
+            csvfile << lpos << "," << rpos << "\n";
 
         // 기준 line
         cv::line(frame, cv::Point(0,offset), cv::Point(frame_width,offset), cv::Scalar(0,255,0), 1, cv::LINE_4);
 
         cv::imshow("frame", frame);
-        // cv::imshow("canny_crop", canny_crop);
 
         if(cv::waitKey(1) == 27)   // ESC
             break;
     }
     cap.release();
     cv::destroyAllWindows();
+    csvfile.close();
 
     return 0;
 }
