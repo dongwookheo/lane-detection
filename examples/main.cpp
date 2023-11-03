@@ -25,7 +25,7 @@ int main()
     std::ofstream csvfile("../result/result.csv");
     csvfile << "count, frame, lpos, rpos \n";
 
-    cv::uint32_t count_frame = 0;
+    uint32_t count_frame = 0;
     cv::Mat frame;
     cv::Mat cropped_frame(cv::Size(k_frame_width, k_frame_height), CV_8UC3);
     cv::Mat mask_lidar = cv::imread("../examples/mask.png", CV_8UC1);
@@ -99,7 +99,7 @@ int main()
             csvfile << (count_frame / 30 - 1) << ","<< count_frame << "," <<lpos << "," << rpos << "\n";
 
         // 기준 line
-        cv::line(frame, cv::Point(0, k_offset), cv::Point(k_frame_width, k_offset), cv::Scalar(0, 255, 0), 1, cv::LINE_4);
+        cv::line(frame, cv::Point(0,k_offset), cv::Point(k_frame_width,k_offset), cv::Scalar(0,255,0), 1, cv::LINE_4);
 
         cv::imshow("frame", frame);
 
