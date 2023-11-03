@@ -12,18 +12,21 @@ void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Ve
 
     for(cv::Vec4i line : lines)
     {
-        int x1 = line[0]; int y1 = line[1];
-        int x2 = line[2]; int y2 = line[3];
+        int x1 = line[0];
+        int y1 = line[1];
+        int x2 = line[2];
+        int y2 = line[3];
 
-        if(x2 - x1 == 0)
+        if(x2 == x1)
             continue;
 
         double slope = static_cast<double>(y2 - y1) / (x2 - x1);
+        constexpr int32_t half_frame = k_frame_width / 2;
 
-        if((slope < -k_low_slope_threshold) && (x1 < k_frame_width / 2))
+        if((slope < -k_low_slope_threshold) && (x1 < half_frame))
             left_lines.emplace_back(x1,y1,x2,y2);
 
-        else if((slope > k_low_slope_threshold) && (x2 > k_frame_width /2))
+        else if((slope > k_low_slope_threshold) && (x2 > half_frame))
             right_lines.emplace_back(x1,y1,x2,y2);
     }
 }
