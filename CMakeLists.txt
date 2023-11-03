@@ -14,6 +14,8 @@ set(${PROJECT_NAME}_EXAMPLES ${${PROJECT_NAME}_PATH}/examples)
 add_subdirectory(modules)
 
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_EXAMPLES}/main.cpp)
+# add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_PATH}/test/changine.cpp)
+# add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_PATH}/test/test.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         LaneDetection
