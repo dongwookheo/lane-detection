@@ -17,3 +17,4 @@ thirdparty/
 .idea/
 cmake-build-release/
 examples/Sub_project.avi
+result/*.avi
