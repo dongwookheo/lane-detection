@@ -175,9 +175,11 @@ int main()
                                                          left_estimation_slope, -0.0005, left_estimation_intercept, -0.1);
             right_prediction = A * (cv::Mat_<double>(4,1) <<
                                                           right_estimation_slope, -0.0005, right_estimation_intercept, -0.1);
+            static const auto A_t = A.t();
             P_prediction = A * P * A.t() + Q;
 
             // #2 Kalman Gain
+            static const auto H_t = H.t();
             K = P_prediction * H.t() * (H * P_prediction * H.t() + R).inv();
 
             // #3 Estimation
