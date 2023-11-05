@@ -11,6 +11,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(${PROJECT_NAME}_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(${PROJECT_NAME}_EXAMPLES ${${PROJECT_NAME}_PATH}/examples)
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions(-DDEBUG=1)
+endif()
+
 add_subdirectory(modules)
 
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_EXAMPLES}/main.cpp)
