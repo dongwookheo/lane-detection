@@ -16,22 +16,23 @@ namespace
     double left_estimation_intercept = 0.0;
     double right_estimation_slope = 0.0;
     double right_estimation_intercept = 0.0;
+    constexpr int16_t k_offset = 400;
 }
 namespace kalman
 {
     double dt = 1;
-    cv::Mat A = (cv::Mat_<double>(4,4) <<
+    cv::Mat transition_matrix = (cv::Mat_<double>(4,4) <<
             1, dt, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, dt,
             0, 0, 0, 1);
-    cv::Mat H = (cv::Mat_<double>(2,4) << 1, 0, 0, 0, 0, 0, 1, 0);
-    cv::Mat Q = cv::Mat::eye(4, 4, CV_64F);
-    cv::Mat R = (cv::Mat_<double>(2, 2) << 50, 0, 0, 50);
+    cv::Mat measurement_matrix = (cv::Mat_<double>(2,4) << 1, 0, 0, 0, 0, 0, 1, 0);
+    cv::Mat process_noise_matrix = cv::Mat::eye(4, 4, CV_64F);
+    cv::Mat measurement_noise_matrix = (cv::Mat_<double>(2, 2) << 50, 0, 0, 50);
 
-    cv::Mat P = 100 * cv::Mat::eye(4, 4, CV_64F);
-    cv::Mat left_prediction, right_prediction, P_prediction;
-    cv::Mat K, left_measure, left_estimation, right_measure, right_estimation;
+    cv::Mat covariance_matrix = 100 * cv::Mat::eye(4, 4, CV_64F);
+    cv::Mat left_prediction, right_prediction, covariance_matrix_prediction;
+    cv::Mat kalman_gain;
 } // kalman
 
 
@@ -102,9 +103,7 @@ int main()
             int32_t y2 = line[3];
 
             if(x2 == x1)
-            {
                 continue;
-            }
 
             int32_t diff_x = x2 - x1;
             int32_t diff_y = y2 - y1;
@@ -160,7 +159,6 @@ int main()
 
         [=, &lpos, &rpos]()
         {
-            using namespace kalman;
             // 칼만 필터
             if(count_frame == 1)
             {
@@ -171,42 +169,41 @@ int main()
             }
 
             // #1 Prediction
-            left_prediction = A * (cv::Mat_<double>(4,1) <<
+            kalman::left_prediction = kalman::transition_matrix * (cv::Mat_<double>(4,1) <<
                                                          left_estimation_slope, -0.0005, left_estimation_intercept, -0.1);
-            right_prediction = A * (cv::Mat_<double>(4,1) <<
+            kalman::right_prediction = kalman::transition_matrix * (cv::Mat_<double>(4,1) <<
                                                           right_estimation_slope, -0.0005, right_estimation_intercept, -0.1);
-            static const auto A_t = A.t();
-            P_prediction = A * P * A_t + Q;
+            static const auto transition_matrix_t = kalman::transition_matrix.t();
+            kalman::covariance_matrix_prediction = kalman::transition_matrix * kalman::covariance_matrix * transition_matrix_t + kalman::process_noise_matrix;
 
             // #2 Kalman Gain
-            static const auto H_t = H.t();
-            K = P_prediction * H_t * (H * P_prediction * H_t + R).inv();
+            static const auto measurement_matrix_t = kalman::measurement_matrix.t();
+            kalman::kalman_gain = kalman::covariance_matrix_prediction * measurement_matrix_t * (kalman::measurement_matrix * kalman::covariance_matrix_prediction * measurement_matrix_t + kalman::measurement_noise_matrix).inv();
 
             // #3 Estimation
             auto updateEstimation =
                     [=](double total_line_length, double average_slope, double average_intercept,
-                            cv::Mat& measurement, cv::Mat& estimation, cv::Mat& prediction,
-                            double& estimation_slope, double& estimation_intercept)
+                            cv::Mat& prediction, double& estimation_slope, double& estimation_intercept)
             {
-                estimation = prediction;
+                cv::Mat estimation = prediction;
                 if (std::round(total_line_length) != 0)
                 {
-                    measurement = (cv::Mat_<double>(2, 1) << average_slope, average_intercept);
-                    estimation += K * (measurement - H * prediction);
+                    cv::Mat measurement = (cv::Mat_<double>(2, 1) << average_slope, average_intercept);
+                    estimation += kalman::kalman_gain * (measurement - kalman::measurement_matrix * prediction);
                 }
 
                 estimation_slope = estimation.at<double>(0, 0);
                 estimation_intercept = estimation.at<double>(2, 0);
             };
 
-            updateEstimation(total_left_length, left_average_slope, left_average_intercept,left_measure,
-                             left_estimation, left_prediction, left_estimation_slope, left_estimation_intercept);
+            updateEstimation(total_left_length, left_average_slope, left_average_intercept,
+                             kalman::left_prediction, left_estimation_slope, left_estimation_intercept);
 
-            updateEstimation(total_right_length, right_average_slope, right_average_intercept, right_measure,
-                             right_estimation, right_prediction, right_estimation_slope, right_estimation_intercept);
+            updateEstimation(total_right_length, right_average_slope, right_average_intercept,
+                             kalman::right_prediction, right_estimation_slope, right_estimation_intercept);
 
             // #4 Error covariance
-            P = P_prediction - K * H * P_prediction;
+            kalman::covariance_matrix = kalman::covariance_matrix_prediction - kalman::kalman_gain * kalman::measurement_matrix * kalman::covariance_matrix_prediction;
 
             int32_t y1 = frame.rows;
             int32_t y2 = std::round(y1>>1);
@@ -223,25 +220,20 @@ int main()
                 return ((intercept == 0) && (slope == 0));
             };
 
-            if(checkSlopeAndIntercept(left_estimation_intercept, left_estimation_slope))
+            auto calculatePosition =
+                    [checkSlopeAndIntercept](double intercept, double slope, uint16_t defaultValue)
             {
-                lpos = 0;
-            }
-            else
-            {
-                lpos = static_cast<uint16_t>((400 - left_estimation_intercept)/ left_estimation_slope);
-            }
+                if(checkSlopeAndIntercept(intercept, slope))
+                    return defaultValue;
+                else
+                    return static_cast<uint16_t>((k_offset - intercept) / slope);
+            };
 
-            if(checkSlopeAndIntercept(right_estimation_intercept, right_estimation_slope))
-            {
-                rpos = 640;
-            }
-            else
-            {
-                rpos = static_cast<uint16_t>((400 - right_estimation_intercept)/ right_estimation_slope);
-            }
-
+            lpos = calculatePosition(left_estimation_intercept, left_estimation_slope, 0);
+            rpos = calculatePosition(right_estimation_intercept, right_estimation_slope, 640);
+#if DEBUG
             std::cout << cv::format("%d_frame : (lpos = %d, rpos = %d)", count_frame, lpos, rpos) << std::endl;
+#endif
             cv::rectangle(frame, cv::Rect(cv::Point(lpos-5, 395),cv::Point(lpos+5, 405)), cv::Scalar(0, 255, 0), 2);
             cv::rectangle(frame, cv::Rect(cv::Point(rpos-5, 395),cv::Point(rpos+5, 405)), cv::Scalar(0, 255, 0), 2);
         }();
