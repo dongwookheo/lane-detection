@@ -26,10 +26,9 @@ namespace XyCar
         cv::GaussianBlur(cropped_frame_, cropped_frame_, cv::Size(), 5);
 
         // canny edge
-        cv::Mat canny_crop;
-        cv::Canny(cropped_frame_, canny_crop, 50, 150);
+        cv::Canny(cropped_frame_, cropped_frame_, 50, 150);
 
-        return canny_crop;
+        return cropped_frame_;
     }
 
 } // XyCar
