@@ -6,7 +6,7 @@
 
 namespace XyCar
 {
-    void divideLeftRightLine(const std::vector<cv::Vec4i> &lines, std::vector <cv::Vec4i> &left_lines, std::vector <cv::Vec4i> &right_lines)
+    void LaneDetector::divideLeftRightLine(const std::vector<cv::Vec4i> &lines, std::vector <cv::Vec4i> &left_lines, std::vector <cv::Vec4i> &right_lines)
     {
         constexpr double k_low_slope_threshold = 0.1;
 
@@ -31,7 +31,7 @@ namespace XyCar
         }
     }
 
-    void calculateSlopeAndIntercept(const std::vector <cv::Vec4i> &lines, bool is_left = true)
+    void LaneDetector::calculateSlopeAndIntercept(const std::vector <cv::Vec4i> &lines, bool is_left = true)
     {
         double length_sum = 0.0, slope_sum = 0.0, intercept_sum = 0.0;
 
@@ -69,7 +69,7 @@ namespace XyCar
         }
     }
 
-    void calculatePos(bool is_left = true)
+    void LaneDetector::calculatePos(bool is_left = true)
     {
         if(is_left){
             if(std::round(state_.left_slope_) == 0 && std::round(state_.left_intercept_) == 0){
@@ -93,7 +93,7 @@ namespace XyCar
         }
     }
 
-    void refinePos()
+    void LaneDetector::refinePos()
     {
         constexpr double k_under_limit = 0.6;
         constexpr double k_upper_limit = 1.0;
