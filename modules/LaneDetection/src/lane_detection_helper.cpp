@@ -143,7 +143,7 @@ void refinePos(double& left_slope, double& left_intercept, double& right_slope, 
             rpos = lpos + k_lane_width;
             right_slope = -left_slope;
             right_intercept = k_offset - right_slope * rpos;
-            if(rpos > k_lane_width) rpos = k_frame_width;
+            if(rpos > k_frame_width) rpos = k_frame_width;
         }
         else {
             rpos = k_frame_width;
