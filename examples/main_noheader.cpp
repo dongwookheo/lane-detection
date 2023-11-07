@@ -8,10 +8,6 @@
 #include "opencv2/core.hpp"
 #include "opencv2/opencv.hpp"
 
-// user defined header
-#include "LaneDetection/LaneDetector.hpp"
-#include "LaneDetection/PreProcessor.hpp"
-
 // global variables
 namespace {
     constexpr uint32_t k_frame_width = 640;
@@ -32,8 +28,10 @@ void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Ve
 
     for(cv::Vec4i line : lines)
     {
-        int x1 = line[0]; int y1 = line[1];
-        int x2 = line[2]; int y2 = line[3];
+        int32_t x1 = line[0];
+        int32_t y1 = line[1];
+        int32_t x2 = line[2];
+        int32_t y2 = line[3];
 
         if(x2 - x1 == 0)
             continue;
@@ -160,7 +158,7 @@ void refinePos(double& left_slope, double& left_intercept, double& right_slope, 
             rpos = lpos + k_lane_width;
             right_slope = -left_slope;
             right_intercept = k_offset - right_slope * rpos;
-            if(rpos > k_lane_width) rpos = k_frame_width;
+            if(rpos > k_frame_width) rpos = k_frame_width;
         }
         else {
             rpos = k_frame_width;
