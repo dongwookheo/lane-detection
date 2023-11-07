@@ -8,8 +8,8 @@
 #include "opencv2/opencv.hpp"
 
 // user defined header
-// #include "LaneDetection/LaneDetector.hpp"
-// #include "LaneDetection/PreProcessor.hpp"
+#include "LaneDetection/LaneDetector.hpp"
+#include "LaneDetection/PreProcessor.hpp"
 #include "LaneDetection/lane_detection_helper.h"
 
 int main()
