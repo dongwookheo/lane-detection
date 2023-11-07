@@ -6,16 +6,16 @@
 
 namespace XyCar
 {
-    void LaneDetector::divideLeftRightLine(const std::vector<cv::Vec4i> &lines, std::vector <cv::Vec4i> &left_lines, std::vector <cv::Vec4i> &right_lines)
+    void LaneDetector::divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines)
     {
         constexpr double k_low_slope_threshold = 0.1;
 
-        for(cv::Vec4i line : lines)
+        for(const cv::Vec4i& line : lines)
         {
-            int x1 = line[0];
-            int y1 = line[1];
-            int x2 = line[2];
-            int y2 = line[3];
+            int32_t x1 = line[0];
+            int32_t y1 = line[1];
+            int32_t x2 = line[2];
+            int32_t y2 = line[3];
 
             if(x2 == x1)
                 continue;
@@ -31,11 +31,13 @@ namespace XyCar
         }
     }
 
-    void LaneDetector::calculateSlopeAndIntercept(const std::vector <cv::Vec4i> &lines, bool is_left = true)
+    void LaneDetector::calculateSlopeAndIntercept(const std::vector<cv::Vec4i>& lines, bool is_left)
     {
-        double length_sum = 0.0, slope_sum = 0.0, intercept_sum = 0.0;
+        double length_sum = 0.0;
+        double slope_sum = 0.0;
+        double intercept_sum = 0.0;
 
-        for(const cv::Vec4i line : lines)
+        for(const cv::Vec4i& line : lines)
         {
             int32_t x1 = line[0];
             int32_t y1 = line[1];
@@ -69,7 +71,7 @@ namespace XyCar
         }
     }
 
-    void LaneDetector::calculatePos(bool is_left = true)
+    void LaneDetector::calculatePos(bool is_left)
     {
         if(is_left){
             if(std::round(state_.left_slope_) == 0 && std::round(state_.left_intercept_) == 0){
