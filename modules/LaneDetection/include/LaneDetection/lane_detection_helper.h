@@ -18,5 +18,6 @@ void calculateSlopeAndIntercept(const std::vector<cv::Vec4i>& lines, double& ave
 void drawLines(cv::Mat& frame, double slope, double intercept, const cv::Scalar& color);
 void calculatePos(int32_t& pos, double slope, double intercept, bool is_left);
 void refinePos(double& left_slope, double& left_intercept, double& right_slope, double& right_intercept, int32_t& lpos, int32_t& rpos);
+int32_t calculateError(int32_t &centor_pos, int32_t lpos, int32_t rpos);
 
 #endif //LANE_DETECTION__LANE_DETECTION_HELPER_H

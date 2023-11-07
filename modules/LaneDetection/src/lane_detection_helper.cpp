@@ -150,3 +150,20 @@ void refinePos(double& left_slope, double& left_intercept, double& right_slope, 
         }
     }
 }
+
+/* @details  Calculate difference of centor frame and pos frame.
+* @param[out]  centor_pos  The centor of lpos and rpos.
+* @param[in]  lpos  The x coordinate of left lane.
+* @param[in]  rpos  The x coordinate of right lane.
+* @return  error The difference of centor frame and centor_pos
+*/
+int32_t calculateError(int32_t &centor_pos, int32_t lpos, int32_t rpos)
+{
+    centor_pos = static_cast<int32_t>((rpos + lpos) / 2);
+
+    int32_t error = k_frame_width / 2 - centor_pos;
+
+    std::cout << error << std::endl;
+
+    return error;
+}

@@ -1,10 +1,13 @@
 // system header
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <fstream>
 
 // third party header
 #include "opencv2/core.hpp"
+#include "opencv2/core/cvdef.h"
+#include "opencv2/imgproc.hpp"
 #include "opencv2/opencv.hpp"
 
 // global variables
@@ -160,15 +163,31 @@ void refinePos(double& left_slope, double& left_intercept, double& right_slope, 
             rpos = lpos + k_lane_width;
             right_slope = -left_slope;
             right_intercept = k_offset - right_slope * rpos;
-            if(rpos > k_frame_width) {
-                std::cout << rpos << std::endl;
+            if(rpos > k_frame_width)
                 rpos = k_frame_width;
-            }
         }
         else {
             rpos = k_frame_width;
         }
     }
+}
+
+
+/* @details  Calculate difference of centor frame and pos frame.
+* @param[out]  centor_pos  The centor of lpos and rpos.
+* @param[in]  lpos  The x coordinate of left lane.
+* @param[in]  rpos  The x coordinate of right lane.
+* @return  error The difference of centor frame and centor_pos
+*/
+int32_t calculateError(int32_t &centor_pos, int32_t lpos, int32_t rpos)
+{
+    centor_pos = static_cast<int32_t>((rpos + lpos) / 2);
+
+    int32_t error = k_frame_width / 2 - centor_pos;
+
+    std::cout << error << std::endl;
+
+    return error;
 }
 
 int main()
@@ -190,6 +209,7 @@ int main()
     cv::Mat mask_lidar = cv::imread("../examples/mask.png", CV_8UC1);
 
     int32_t lpos = 0, rpos = k_frame_width;
+    int32_t centor_pos = 0;
 
     while(true)
     {
@@ -252,6 +272,11 @@ int main()
         calculatePos(rpos, right_average_slope, right_average_intercept, false);
 
         refinePos(left_average_slope, left_average_intercept, right_average_slope, right_average_intercept, lpos, rpos);
+
+        calculateError(centor_pos, lpos, rpos);
+
+        cv::rectangle(frame, cv::Rect(cv::Point(centor_pos-5, 395),cv::Point(centor_pos+5, 405)), cv::Scalar(0, 255, 0));
+        cv::rectangle(frame, cv::Rect(cv::Point(k_frame_width / 2-5, 395),cv::Point(k_frame_width / 2+5, 405)), cv::Scalar(255, 0, 255));
 
         drawLines(frame, left_average_slope, left_average_intercept, cv::Scalar(255, 0, 0));
         drawLines(frame, right_average_slope, right_average_intercept, cv::Scalar(255, 0, 0));
