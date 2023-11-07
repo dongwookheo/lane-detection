@@ -8,8 +8,6 @@
 #include "opencv2/opencv.hpp"
 
 // user defined header
-// #include "LaneDetection/LaneDetector.hpp"
-// #include "LaneDetection/PreProcessor.hpp"
 #include "LaneDetection/lane_detection_helper.h"
 
 int main()
@@ -31,6 +29,7 @@ int main()
     cv::Mat mask_lidar = cv::imread("../examples/mask.png", CV_8UC1);
 
     int32_t lpos = 0, rpos = k_frame_width;
+    int32_t centor_pos = 0;
 
     while(true)
     {
@@ -87,6 +86,11 @@ int main()
         calculatePos(rpos, right_average_slope, right_average_intercept, false);
 
         refinePos(left_average_slope, left_average_intercept, right_average_slope, right_average_intercept, lpos, rpos);
+
+        calculateError(centor_pos, lpos, rpos);
+
+        cv::rectangle(frame, cv::Rect(cv::Point(centor_pos-5, 395),cv::Point(centor_pos+5, 405)), cv::Scalar(0, 255, 0));
+        cv::rectangle(frame, cv::Rect(cv::Point(k_frame_width / 2-5, 395),cv::Point(k_frame_width / 2+5, 405)), cv::Scalar(255, 0, 255));
 
         drawLines(frame, left_average_slope, left_average_intercept, cv::Scalar(255, 0, 0));
         drawLines(frame, right_average_slope, right_average_intercept, cv::Scalar(255, 0, 0));
