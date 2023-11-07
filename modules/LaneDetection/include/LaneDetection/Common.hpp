@@ -5,7 +5,7 @@
 
 namespace XyCar
 {
-    using PREC = float;
+    using PREC = double;
 
     constexpr uint32_t k_frame_width = 640;
     constexpr uint32_t k_frame_height = 480;
@@ -20,7 +20,7 @@ namespace XyCar
     {
         PREC left_slope_;
         PREC left_intercept_;
-        PREC right_slop_;
+        PREC right_slope_;
         PREC right_intercept_;
         PREC left_pos_;
         PREC right_pos_;
