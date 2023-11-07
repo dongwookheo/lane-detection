@@ -2,8 +2,8 @@
 // Created by nahye on 23. 11. 7.
 //
 
-#ifndef LANE_DETECTION_LANEDETECTOR_HPP
-#define LANE_DETECTION_LANEDETECTOR_HPP
+#ifndef LANE_DETECTION__LANEDETECTOR_HPP
+#define LANE_DETECTION__LANEDETECTOR_HPP
 
 #include "opencv2/opencv.hpp"
 #include "LaneDetection/Common.hpp"
@@ -60,4 +60,4 @@ private:
 };
 }
 
-#endif //TEP_LANEDETECTOR_HPP
+#endif //LANE_DETECTION__LANEDETECTOR_HPP
