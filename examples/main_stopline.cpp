@@ -2,7 +2,6 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
-#include <cassert>
 
 // third party header
 #include "opencv2/core.hpp"
@@ -22,7 +21,7 @@ namespace {
 * @param[out]  right_lines  Coordinates of right lines consisting of starting and ending points (x, y).
 * @return  void
 */
-void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines)
+void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines, std::vector<cv::Vec4i>& stop_lines)
 {
     constexpr double k_low_slope_threshold = 0.1;
 
@@ -43,6 +42,9 @@ void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Ve
 
         else if((slope > k_low_slope_threshold) && (x2 > k_frame_width /2))
             right_lines.emplace_back(x1,y1,x2,y2);
+
+        else if((abs(slope) <= k_low_slope_threshold) && (x1 > k_frame_width/4) && (x1 < k_frame_width/4 * 3))
+            stop_lines.emplace_back(x1,y1,x2,y2);
     }
 }
 
@@ -158,7 +160,10 @@ void refinePos(double& left_slope, double& left_intercept, double& right_slope, 
             rpos = lpos + k_lane_width;
             right_slope = -left_slope;
             right_intercept = k_offset - right_slope * rpos;
-            if(rpos > k_frame_width) rpos = k_frame_width;
+            if(rpos > k_frame_width) {
+                std::cout << rpos << std::endl;
+                rpos = k_frame_width;
+            }
         }
         else {
             rpos = k_frame_width;
@@ -222,8 +227,14 @@ int main()
         cv::HoughLinesP(canny_crop, lines, 1, CV_PI/180, 60, 60, 5);
 
         // divide left, right lines
-        std::vector<cv::Vec4i> left_lines, right_lines;
-        divideLeftRightLine(lines, left_lines, right_lines);
+        std::vector<cv::Vec4i> left_lines, right_lines, stop_lines;
+        divideLeftRightLine(lines, left_lines, right_lines, stop_lines);
+
+        if(stop_lines.size() >=2 ){
+            for(cv::Vec4i line : stop_lines) {
+                cv::line(frame, cv::Point(line[0], line[1]+(mask_lidar.rows>>3)*5), cv::Point(line[2], line[3]+(mask_lidar.rows>>3)*5), cv::Scalar(255,0,255), 2, cv::LINE_8);
+            }
+        }
 
         // calculate slop and intercept using weighted average
         double left_average_slope = 0.0;
