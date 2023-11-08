@@ -1,11 +1,14 @@
 // system header
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <fstream>
-#include <cassert>
+#include <vector>
 
 // third party header
 #include "opencv2/core.hpp"
+#include "opencv2/core/operations.hpp"
+#include "opencv2/imgcodecs.hpp"
 #include "opencv2/opencv.hpp"
 
 // global variables
@@ -16,15 +19,20 @@ namespace {
     constexpr uint32_t k_lane_width = 490;
     constexpr uint32_t k_offset = 400;
 }
-/* @details  Divide 'lines' into 'left_lines' and 'right_lines' based on slope.
+/* @details  Divide 'lines' into 'left_lines' and 'right_lines' based on slope and 'stop_lines'.
 * @param[in]  lines  Coordinates consisting of starting and ending points (x, y).
 * @param[out]  left_lines  Coordinates of left lines consisting of starting and ending points (x, y).
 * @param[out]  right_lines  Coordinates of right lines consisting of starting and ending points (x, y).
+* @param[out]  stop_lines  Coordinates of stop lines consisting of starting and ending points (x, y).
 * @return  void
 */
-void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines)
+void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines, std::vector<cv::Vec4i>& stop_lines)
 {
     constexpr double k_low_slope_threshold = 0.1;
+    constexpr double k_stop_slpoe_threshold = 0.15;
+
+    constexpr int32_t k_half_frame = k_frame_width / 2;
+    constexpr int32_t k_threshold_location = k_frame_width / 5;
 
     for(cv::Vec4i line : lines)
     {
@@ -38,12 +46,27 @@ void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Ve
 
         double slope = static_cast<double>(y2 - y1) / (x2 - x1);
 
-        if((slope < -k_low_slope_threshold) && (x1 < k_frame_width / 2))
+        if((slope < -k_low_slope_threshold) && (x1 < k_half_frame))
             left_lines.emplace_back(x1,y1,x2,y2);
 
-        else if((slope > k_low_slope_threshold) && (x2 > k_frame_width /2))
+        else if((slope > k_low_slope_threshold) && (x2 > k_half_frame))
             right_lines.emplace_back(x1,y1,x2,y2);
+
+        else if((abs(slope) <= k_stop_slpoe_threshold) && (x1 > k_threshold_location) && (x2 < k_threshold_location * 4))
+            stop_lines.emplace_back(x1,y1,x2,y2);
     }
+}
+
+/* @details  Find the stop line.
+* @param[in]  stop_lines  Coordinates of stop lines consisting of starting and ending points (x, y).
+* @return  bool The flag of stop.
+*/
+bool findStopLine(const std::vector<cv::Vec4i> &stoplines)
+{
+    if(stoplines.size() >= 2)
+        return true;
+    else
+        return false;
 }
 
 /* @details  Calculates the slope and intercept of 'lines',
@@ -158,12 +181,31 @@ void refinePos(double& left_slope, double& left_intercept, double& right_slope, 
             rpos = lpos + k_lane_width;
             right_slope = -left_slope;
             right_intercept = k_offset - right_slope * rpos;
-            if(rpos > k_frame_width) rpos = k_frame_width;
+            if(rpos > k_frame_width)
+                rpos = k_frame_width;
         }
         else {
             rpos = k_frame_width;
         }
     }
+}
+
+
+/* @details  Calculate difference of centor frame and pos frame.
+* @param[out]  centor_pos  The centor of lpos and rpos.
+* @param[in]  lpos  The x coordinate of left lane.
+* @param[in]  rpos  The x coordinate of right lane.
+* @return  error The difference of centor frame and centor_pos
+*/
+int32_t calculateError(int32_t &centor_pos, int32_t lpos, int32_t rpos)
+{
+    centor_pos = static_cast<int32_t>((rpos + lpos) / 2);
+
+    int32_t error = k_frame_width / 2 - centor_pos;
+
+    // std::cout << error << std::endl;
+
+    return error;
 }
 
 int main()
@@ -185,6 +227,7 @@ int main()
     cv::Mat mask_lidar = cv::imread("../examples/mask.png", CV_8UC1);
 
     int32_t lpos = 0, rpos = k_frame_width;
+    int32_t centor_pos = 0;
 
     while(true)
     {
@@ -222,8 +265,24 @@ int main()
         cv::HoughLinesP(canny_crop, lines, 1, CV_PI/180, 60, 60, 5);
 
         // divide left, right lines
-        std::vector<cv::Vec4i> left_lines, right_lines;
-        divideLeftRightLine(lines, left_lines, right_lines);
+        std::vector<cv::Vec4i> left_lines, right_lines, stop_lines;
+        divideLeftRightLine(lines, left_lines, right_lines, stop_lines);
+
+        bool is_stop = findStopLine(stop_lines);
+
+        if(is_stop)
+            std::cout << "stop!!" << std::endl;
+
+        // if(stop_lines.size() >=2 ){
+        //     std::cout << "----------stop-------------" << std::endl;
+        //     for(cv::Vec4i line : stop_lines) {
+        //         cv::line(frame, cv::Point(line[0], line[1]+(mask_lidar.rows>>3)*5), cv::Point(line[2], line[3]+(mask_lidar.rows>>3)*5), cv::Scalar(255,0,255), 2, cv::LINE_8);
+        //         std::cout << "slope: " << static_cast<double>(line[3] - line[1]) / (line[2] - line[0]) << std::endl;
+        //         std::cout << "locate: " << line << std::endl;
+        //     }
+        //     std::cout << "---------stop end-----------" << std::endl;
+        //     cv::imwrite(cv::format("../data/%d.png", count_frame), frame);
+        // }
 
         // calculate slop and intercept using weighted average
         double left_average_slope = 0.0;
@@ -241,6 +300,11 @@ int main()
         calculatePos(rpos, right_average_slope, right_average_intercept, false);
 
         refinePos(left_average_slope, left_average_intercept, right_average_slope, right_average_intercept, lpos, rpos);
+
+        calculateError(centor_pos, lpos, rpos);
+
+        cv::rectangle(frame, cv::Rect(cv::Point(centor_pos-5, 395),cv::Point(centor_pos+5, 405)), cv::Scalar(0, 255, 0));
+        cv::rectangle(frame, cv::Rect(cv::Point(k_frame_width / 2-5, 395),cv::Point(k_frame_width / 2+5, 405)), cv::Scalar(255, 0, 255));
 
         drawLines(frame, left_average_slope, left_average_intercept, cv::Scalar(255, 0, 0));
         drawLines(frame, right_average_slope, right_average_intercept, cv::Scalar(255, 0, 0));

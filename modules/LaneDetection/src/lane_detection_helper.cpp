@@ -4,31 +4,50 @@
 * @param[in]  lines  Coordinates consisting of starting and ending points (x, y).
 * @param[out]  left_lines  Coordinates of left lines consisting of starting and ending points (x, y).
 * @param[out]  right_lines  Coordinates of right lines consisting of starting and ending points (x, y).
+* @param[out]  stop_lines  Coordinates of stop lines consisting of starting and ending points (x, y).
 * @return  void
 */
-void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines)
+void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines, std::vector<cv::Vec4i>& stop_lines)
 {
     constexpr double k_low_slope_threshold = 0.1;
+    constexpr double k_stop_slpoe_threshold = 0.15;
+
+    constexpr int32_t k_half_frame = k_frame_width / 2;
+    constexpr int32_t k_threshold_location = k_frame_width / 5;
 
     for(cv::Vec4i line : lines)
     {
-        int x1 = line[0];
-        int y1 = line[1];
-        int x2 = line[2];
-        int y2 = line[3];
+        int32_t x1 = line[0];
+        int32_t y1 = line[1];
+        int32_t x2 = line[2];
+        int32_t y2 = line[3];
 
-        if(x2 == x1)
+        if(x2 - x1 == 0)
             continue;
 
         double slope = static_cast<double>(y2 - y1) / (x2 - x1);
-        constexpr int32_t half_frame = k_frame_width / 2;
 
-        if((slope < -k_low_slope_threshold) && (x1 < half_frame))
+        if((slope < -k_low_slope_threshold) && (x1 < k_half_frame))
             left_lines.emplace_back(x1,y1,x2,y2);
 
-        else if((slope > k_low_slope_threshold) && (x2 > half_frame))
+        else if((slope > k_low_slope_threshold) && (x2 > k_half_frame))
             right_lines.emplace_back(x1,y1,x2,y2);
+
+        else if((abs(slope) <= k_stop_slpoe_threshold) && (x1 > k_threshold_location) && (x2 < k_threshold_location * 4))
+            stop_lines.emplace_back(x1,y1,x2,y2);
     }
+}
+
+/* @details  Find the stop line.
+* @param[in]  stop_lines  Coordinates of stop lines consisting of starting and ending points (x, y).
+* @return  bool The flag of stop.
+*/
+bool findStopLine(const std::vector<cv::Vec4i> &stoplines)
+{
+    if(stoplines.size() >= 2)
+        return true;
+    else
+        return false;
 }
 
 /* @details  Calculates the slope and intercept of 'lines',
@@ -163,7 +182,7 @@ int32_t calculateError(int32_t &centor_pos, int32_t lpos, int32_t rpos)
 
     int32_t error = k_frame_width / 2 - centor_pos;
 
-    std::cout << error << std::endl;
+    // std::cout << error << std::endl;
 
     return error;
 }

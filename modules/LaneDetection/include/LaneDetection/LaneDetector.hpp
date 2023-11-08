@@ -7,6 +7,7 @@
 
 #include "opencv2/opencv.hpp"
 #include "LaneDetection/Common.hpp"
+#include <algorithm>
 
 namespace XyCar
 {
@@ -24,9 +25,9 @@ public:
      * @details Estimate the lane from the edge image and return the coordinates of the left & right lanes.
      * @param[in] canny_crop Canny edge ROI image.
      * @param[in] is_refining Flag about whether to refine position of lane.
-     * @return std::pair<int32_t, int32_t>
+     * @return std::tuple<int32_t, int32_t, bool>
      */
-    std::pair<int32_t, int32_t> find_pos(const cv::Mat& canny_crop, bool is_refining = true)
+    std::tuple<int32_t, int32_t, bool> find_pos(const cv::Mat& canny_crop, bool is_refining = true)
     {
         std::vector<cv::Vec4i> lines;
         cv::HoughLinesP(canny_crop, lines, 1, CV_PI / 180, 60, 60, 5);
@@ -36,8 +37,10 @@ public:
         if (is_refining)
             refinePos();
 
-        return { state_.left_pos_, state_.right_pos_ };
+        return { state_.left_pos_, state_.right_pos_, state_.stop_flag_};
     }
+
+
 
 private:
     /**
@@ -45,9 +48,17 @@ private:
      * @param[in] lines Coordinates consisting of starting and ending points. (x, y)
      * @param[out] left_lines Coordinates of left lines consisting of starting and ending points (x, y).
      * @param[out] right_lines Coordinates of right lines consisting of starting and ending points (x, y).
+     * @param[out] stop_lines  Coordinates of stop lines consisting of starting and ending points (x, y).
      * @return void
      */
-    void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines);
+    void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines, std::vector<cv::Vec4i>& stop_lines);
+
+    /**
+     * @details  Find the stop line.
+     * @param[in]  stop_lines  Coordinates of stop lines consisting of starting and ending points (x, y).
+     * @return  void
+     */
+    void findStopLine(const std::vector<cv::Vec4i> &stoplines);
 
     /**
      * @details Calculates the slope and intercept of 'lines',
@@ -80,20 +91,21 @@ private:
      */
     void evaluate(const std::vector<cv::Vec4i>& lines)
     {
-        std::vector<cv::Vec4i> left_lines, right_lines;
-        divideLeftRightLine(lines, left_lines, right_lines);
+        std::vector<cv::Vec4i> left_lines, right_lines, stop_lines;
+        divideLeftRightLine(lines, left_lines, right_lines, stop_lines);
 
         calculateSlopeAndIntercept(left_lines);
         calculateSlopeAndIntercept(right_lines, false);
-        kalman_.predict();
+        // kalman_.predict();
+        findStopLine(stop_lines);
 
         // calculate lpos, rpos
         calculatePos();
         calculatePos(false);
-        kalman_.update();
+        // kalman_.update();
     }
 
-    KalmanFilter kalman_;
+    // KalmanFilter kalman_;
     State state_;
 };
 }
