@@ -2,7 +2,7 @@
 
 namespace XyCar
 {
-    PREC getControlOutput(int32_t error)
+    PREC PIDController::getControlOutput(int32_t error)
     {
         PREC cast_rrror = static_cast<PREC>(error);
         differential_error_ = cast_rrror - proportional_error_;
