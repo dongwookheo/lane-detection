@@ -24,6 +24,7 @@ namespace XyCar
         PREC right_intercept_;
         PREC left_pos_;
         PREC right_pos_;
+        bool stop_flag_;
     };
 } // XyCar
 

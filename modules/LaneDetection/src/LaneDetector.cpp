@@ -6,9 +6,13 @@
 
 namespace XyCar
 {
-    void LaneDetector::divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines)
+    void LaneDetector::divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines, std::vector<cv::Vec4i>& stop_lines)
     {
         constexpr double k_low_slope_threshold = 0.1;
+        constexpr double k_stop_slpoe_threshold = 0.15;
+
+        constexpr int32_t k_half_frame = k_frame_width / 2;
+        constexpr int32_t k_threshold_location = k_frame_width / 5;
 
         for(const cv::Vec4i& line : lines)
         {
@@ -21,14 +25,24 @@ namespace XyCar
                 continue;
 
             double slope = static_cast<double>(y2 - y1) / (x2 - x1);
-            constexpr int32_t half_frame = k_frame_width / 2;
 
-            if((slope < -k_low_slope_threshold) && (x1 < half_frame))
+            if((slope < -k_low_slope_threshold) && (x1 < k_half_frame))
                 left_lines.emplace_back(x1,y1,x2,y2);
 
-            else if((slope > k_low_slope_threshold) && (x2 > half_frame))
+            else if((slope > k_low_slope_threshold) && (x2 > k_half_frame))
                 right_lines.emplace_back(x1,y1,x2,y2);
+
+            else if((abs(slope) <= k_stop_slpoe_threshold) && (x1 > k_threshold_location) && (x2 < k_threshold_location * 4))
+                stop_lines.emplace_back(x1,y1,x2,y2);
         }
+    }
+
+    void LaneDetector::findStopLine(const std::vector<cv::Vec4i> &stoplines)
+    {
+        if(stoplines.size() >= 2)
+            state_.stop_flag_ = true;
+        else
+            state_.stop_flag_ = false;
     }
 
     void LaneDetector::calculateSlopeAndIntercept(const std::vector<cv::Vec4i>& lines, bool is_left)
