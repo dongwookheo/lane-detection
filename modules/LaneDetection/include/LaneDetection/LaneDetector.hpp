@@ -37,7 +37,7 @@ public:
         if (is_refining)
             refinePos();
 
-        return { state_.left_pos_, state_.right_pos_, state_.stop_flag_};
+        return std::make_tuple(state_.left_pos_, state_.right_pos_, state_.stop_flag_);
     }
 
 

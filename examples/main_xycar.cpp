@@ -7,7 +7,7 @@
 int32_t main()
 {
     ros::init();
-    LaneManager laneManager;
+    XyCar::LaneManager laneManager;
 
     laneManager.run();
     ros::spin();
