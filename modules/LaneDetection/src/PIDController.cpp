@@ -3,11 +3,7 @@
 namespace XyCar
 {
     PIDController::PIDController(PREC p_gain, PREC i_gain, PREC d_gain)
-    {
-        proportional_gain_= p_gain;
-        integral_gain_ = i_gain;
-        differential_gain_ = d_gain;
-    }
+        : proportional_gain_(p_gain), integral_gain_(i_gain), differential_gain_(d_gain) {}
 
     PREC PIDController::getControlOutput(int32_t error)
     {
@@ -18,4 +14,4 @@ namespace XyCar
 
         return proportional_gain_ * proportional_error_ + integral_gain_ * integral_error_ + differential_gain_ * differential_error_;
     }
-}
+} // XyCar

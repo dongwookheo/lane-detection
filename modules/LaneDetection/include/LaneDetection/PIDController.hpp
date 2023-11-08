@@ -11,8 +11,19 @@ namespace XyCar{
 class PIDController
 {
 public:
+    /**
+     * @details Construct a new PID Object.
+     * @param[in] p_gain Proportional control gain.
+     * @param[in] i_gain Integral control gain.
+     * @param[in] d_gain Differential control gain.
+     */
     PIDController(PREC p_gain, PREC i_gain, PREC d_gain);
 
+    /**
+     * @details Compute with the PID Control and return control error.
+     * @param[in] error Error between the estimated x coordinates and half of the image.
+     * @return XyCar::PREC
+     */
     PREC getControlOutput(int32_t error);
 
 private:
