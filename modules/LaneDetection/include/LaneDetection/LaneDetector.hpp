@@ -108,6 +108,6 @@ private:
     // KalmanFilter kalman_;
     State state_;
 };
-}
+} // XyCar
 
 #endif // LANE_DETECTION__LANEDETECTOR_HPP
