@@ -10,7 +10,6 @@
 
 // user defined header
 #include "LaneDetection/LaneDetector.hpp"
-#include "LaneDetection/PreProcessor.hpp"
 
 // global variables
 namespace {

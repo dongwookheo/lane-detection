@@ -13,7 +13,6 @@
 
 // 사용자 정의 헤더
 #include "LaneDetection/LaneDetector.hpp"
-#include "LaneDetection/PreProcessor.hpp"
 
 cv::Mat equal_gray, stretch_gray;
 cv::Mat dst_equal_gray, dst_stretch_gray;
