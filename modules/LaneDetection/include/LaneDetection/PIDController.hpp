@@ -12,7 +12,6 @@ class PIDController
 {
 public:
     PIDController(PREC p_gain, PREC i_gain, PREC d_gain);
-    
 
     PREC getControlOutput(int32_t error);
 
