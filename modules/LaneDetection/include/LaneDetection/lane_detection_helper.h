@@ -13,7 +13,8 @@ namespace {
     constexpr uint32_t k_offset = 400;
 }
 
-void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines);
+void divideLeftRightLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& left_lines, std::vector<cv::Vec4i>& right_lines, std::vector<cv::Vec4i>& stop_lines);
+bool findStopLine(const std::vector<cv::Vec4i> &stoplines);
 void calculateSlopeAndIntercept(const std::vector<cv::Vec4i>& lines, double& average_slope, double& average_intercept);
 void drawLines(cv::Mat& frame, double slope, double intercept, const cv::Scalar& color);
 void calculatePos(int32_t& pos, double slope, double intercept, bool is_left);

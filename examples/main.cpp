@@ -67,8 +67,13 @@ int main()
         cv::HoughLinesP(canny_crop, lines, 1, CV_PI/180, 60, 60, 5);
 
         // divide left, right lines
-        std::vector<cv::Vec4i> left_lines, right_lines;
-        divideLeftRightLine(lines, left_lines, right_lines);
+        std::vector<cv::Vec4i> left_lines, right_lines, stop_lines;
+        divideLeftRightLine(lines, left_lines, right_lines, stop_lines);
+
+        bool is_stop = findStopLine(stop_lines);
+
+        if(is_stop)
+            std::cout << "stop!!" << std::endl;
 
         // calculate slop and intercept using weighted average
         double left_average_slope = 0.0;
