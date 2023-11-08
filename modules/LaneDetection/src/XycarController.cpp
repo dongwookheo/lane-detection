@@ -17,10 +17,10 @@ namespace XyCar
         // when xycar turn left
         if (angle < -10 && speed_ > k_min_speed_)
             speed_ -= k_step_speed_;
-            // when xycar turn right
+        // when xycar turn right
         else if (angle > 10 && speed_ > k_min_speed_)
             speed_ -= k_step_speed_;
-            // when xycar go straight
+        // when xycar go straight
         else if ((angle >= -10 && angle <= 10) && speed_ < k_max_speed_)
             speed_ += k_step_speed_;
 
