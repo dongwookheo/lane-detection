@@ -11,12 +11,8 @@ namespace Xycar{
 class PIDController
 {
 public:
-    PIDController(PREC p_gain, PREC i_gain, PREC d_gain)
-    {
-        proportional_gain_(p_gain);
-        integral_gain_(i_gain);
-        differential_gain_(d_gain);
-    }
+    PIDController(PREC p_gain, PREC i_gain, PREC d_gain);
+    
 
     PREC getControlOutput(int32_t error);
 
