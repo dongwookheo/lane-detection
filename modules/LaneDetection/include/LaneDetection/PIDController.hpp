@@ -24,6 +24,6 @@ private:
     PREC integral_error_ = 0.0;
     PREC differential_error_ = 0.0;
 };
-}
+} // XyCar
 
-#endif //LANE_DETECTION__PIDCONTROLLER_HPP
+#endif // LANE_DETECTION__PIDCONTROLLER_HPP
