@@ -4,7 +4,7 @@
 // user defined header
 #include "LaneDetection/Common.hpp"
 
-namespace Xycar{
+namespace XyCar{
 /**
  * @details PID Controller Class
  */
