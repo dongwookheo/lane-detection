@@ -27,7 +27,7 @@ public:
      * @param[in] is_refining Flag about whether to refine position of lane.
      * @return std::tuple<int32_t, int32_t, bool>
      */
-    std::tuple<int32_t, int32_t, bool> find_pos(const cv::Mat& canny_crop, bool is_refining = true)
+    std::tuple<int32_t, int32_t, bool> findPos(const cv::Mat& canny_crop, bool is_refining = true)
     {
         std::vector<cv::Vec4i> lines;
         cv::HoughLinesP(canny_crop, lines, 1, CV_PI / 180, 60, 60, 5);
