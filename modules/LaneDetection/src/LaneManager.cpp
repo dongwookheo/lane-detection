@@ -3,11 +3,9 @@
 
 namespace XyCar
 {
-    //생성자 : 이때 controller 를 생성해야하는데 어떻게 하지...
-    LaneManager::LaneManager(PREC p_gain, PREC i_gain, PREC d_gain)
+    LaneManager::LaneManager(PREC p_gain, PREC i_gain, PREC d_gain) : pid_controller_(p_gain, i_gain, d_gain)
     {
         subscriber_ = node_handler_.subscribe("/usb_cam/image_raw/", 1, image_callback);
-        pid_controller_ = new PIDController(p_gain, i_gain, d_gain);
     }
 
     void LaneManager::image_callback(const sensor_msgs::Image& message)
